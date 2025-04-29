@@ -23,16 +23,26 @@ A free, locally-hosted tool that helps game developers improve code through AI-a
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/game-code-iterator.git
+git clone https://github.com/Nachiketa-Singamsetty/game-code-iterator.git
 cd game-code-iterator
+
+# Clone the repository
+git clone https://github.com/Nachiketa-Singamsetty/game-code-iterator.git
+cd game-code-iterator
+
+# Activate the existing virtual environment
+venv\Scripts\activate   # For Windows
+# source venv/bin/activate   # For macOS/Linux
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Install Ollama from ollama.com
+# Install Ollama from https://ollama.com/
 
-# Download a language model
+# Download a language model in cmd (LLaMA 3 or CodeLLaMA recommended)
 ollama pull llama3
+# or
+ollama pull codellama
 ```
 
 ### Running the Application
