@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Code Iterator</title>
+    <style>
+        body {
+            font-family: 'Fira Code', monospace;
+            line-height: 1.6;
+            color: #e0e0e0;
+            background-color: #1e1e2f;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #00ffc3;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 0 0 5px #00ffc3;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .input-section, .output-section {
+            background: #2b2b3d;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 195, 0.1);
+        }
+
+        textarea, input[type="text"] {
+            width: 90%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 6px;
+            background-color: #1c1c2b;
+            color: #e0e0e0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95em;
+        }
+
+        button {
+            background-color: #00ffc3;
+            color: #1e1e2f;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 10px #00ffc3;
+        }
+
+        #integrate-btn {
+            background-color: #ff4081;
+        }
+
+        #integrate-btn:hover {
+            box-shadow: 0 0 10px #ff4081;
+        }
+
+        pre {
+            background-color: #151525;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            overflow-y: auto;
+            border: 1px solid #333;
+            color: #00ffff;
+            min-height: 200px; /* ⬅️ Increase height */
+            font-size: 0.95em;
+        }
+
+
+        .loading {
+            text-align: center;
+            color: #888;
+        }
+
+        .tab-container {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #33334d;
+            border-radius: 6px 6px 0 0;
+            margin-right: 5px;
+            color: #ccc;
+            font-weight: bold;
+        }
+
+        .tab.active {
+            background-color: #1e1e2f;
+            border-bottom: 2px solid #00ffc3;
+            color: #00ffc3;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        #final-output {
+            display: none;
+        }
+
+        .model-info {
+            background-color: #2d2d40;
+            border-left: 4px solid #ffb347;
+            padding: 15px;
+            border-radius: 0 4px 4px 0;
+            color: #f0e6d2;
+            margin-bottom: 20px;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code&display=swap');
+
+    </style>
+</head>
+<body>
+    <h1>🎮 Game Code Iterator</h1>
+    
+    <div class="model-info">
+        <p><strong>Using:</strong> Local Ollama model (free, runs on your machine)</p>
+        <p><strong>Note:</strong> Processing time depends on your computer's capabilities. Responses might take longer than cloud-based models.</p>
+    </div>
+    
+    <div class="container">
+        <div class="input-section">
+            <h2>Input</h2>
+            <label for="code-input">Original Code:</label>
+            <textarea id="code-input" placeholder="Paste your game code here..."></textarea>
+            
+            <label for="prompt-input">What would you like to improve?</label>
+            <input type="text" id="prompt-input" placeholder="E.g., Optimize this collision detection algorithm">
+            
+            <button id="submit-btn">Improve Code</button>
+            <div class="loading" id="loading-indicator">Processing your request (this might take a minute)</div>
+        </div>
+        
+        <div class="output-section">
+            <h2>Output</h2>
+            
+            <div id="result-container">
+                <div class="tab-container">
+                    <div class="tab active" data-tab="improved-code">Improved Code</div>
+                    <div class="tab" data-tab="explanation">Explanation</div>
+                    <div class="tab" data-tab="suggestions">Additional Suggestions</div>
+                </div>
+                
+                <div class="tab-content active" id="improved-code">
+                    <pre id="improved-code-display">Your improved code will appear here.</pre>
+                </div>
+                
+                <div class="tab-content" id="explanation">
+                    <div id="explanation-display">Explanation will appear here.</div>
+                </div>
+                
+                <div class="tab-content" id="suggestions">
+                    <div id="suggestions-display">Additional suggestions will appear here.</div>
+                </div>
+                
+                <button id="integrate-btn">Integrate Changes</button>
+            </div>
+            
+            <div id="final-output">
+                <h3>Final Integrated Code:</h3>
+                <pre id="final-code-display"></pre>
+                <button id="reset-btn">Start New Iteration</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const codeInput = document.getElementById('code-input');
+            const promptInput = document.getElementById('prompt-input');
+            const submitBtn = document.getElementById('submit-btn');
+            const integrateBtn = document.getElementById('integrate-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const resultContainer = document.getElementById('result-container');
+            const finalOutput = document.getElementById('final-output');
+            const improvedCodeDisplay = document.getElementById('improved-code-display');
+            const explanationDisplay = document.getElementById('explanation-display');
+            const suggestionsDisplay = document.getElementById('suggestions-display');
+            const finalCodeDisplay = document.getElementById('final-code-display');
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            let lastResponse = null;
+            
+            submitBtn.addEventListener('click', async function() {
+                const code = codeInput.value.trim();
+                const prompt = promptInput.value.trim();
+                
+                if (!code) {
+                    alert('Please enter some code to improve.');
+                    return;
+                }
+                
+                if (!prompt) {
+                    alert('Please describe what improvements you want.');
+                    return;
+                }
+                
+                // Show loading indicator
+                loadingIndicator.style.display = 'block';
+                submitBtn.disabled = true;
+                
+                try {
+                    const response = await fetch('/process_code', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            code: code,
+                            prompt: prompt
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Server error');
+                    }
+                    
+                    lastResponse = await response.json();
+                    
+                    // Update the displays
+                    improvedCodeDisplay.textContent = lastResponse.improved_code;
+                    explanationDisplay.innerHTML = marked.parse(lastResponse.explanation);
+                    suggestionsDisplay.innerHTML = marked.parse(lastResponse.additional_suggestions);
+                    
+                    // Show integrate button
+                    integrateBtn.style.display = 'block';
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                } finally {
+                    loadingIndicator.style.display = 'none';
+                    submitBtn.disabled = false;
+                }
+            });
+            
+            integrateBtn.addEventListener('click', function() {
+                if (lastResponse) {
+                    finalCodeDisplay.textContent = lastResponse.improved_code;
+                    resultContainer.style.display = 'none';
+                    finalOutput.style.display = 'block';
+                }
+            });
+            
+            resetBtn.addEventListener('click', function() {
+                codeInput.value = finalCodeDisplay.textContent;
+                promptInput.value = '';
+                lastResponse = null;
+                finalOutput.style.display = 'none';
+                resultContainer.style.display = 'block';
+                integrateBtn.style.display = 'none';
+                improvedCodeDisplay.textContent = 'Your improved code will appear here.';
+                explanationDisplay.textContent = 'Explanation will appear here.';
+                suggestionsDisplay.textContent = 'Additional suggestions will appear here.';
+            });
+            
+            // Tab functionality
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show corresponding content
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === tabId) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+    
+    <!-- Add marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</body>
+</html>
