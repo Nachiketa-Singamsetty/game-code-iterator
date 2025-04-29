@@ -178,9 +178,10 @@ class Player:
 - **Backend**: Flask web server
 - **AI Engine**: Ollama with llama3/codellama
 
-## License
+## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 
 ---
 
