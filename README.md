@@ -4,7 +4,7 @@ A free, locally-hosted tool that helps game developers improve code through AI-a
 
 ## Video Demonstration
 
-[![Watch the video demonstration](https://img.shields.io/badge/YouTube-Watch_Demo-red?style=for-the-badge&logo=youtube)](https://youtube.com/your_video_link_here)
+[![Watch the video demonstration](https://img.shields.io/badge/YouTube-Watch_Demo-red?style=for-the-badge&logo=youtube)](https://youtu.be/TA51TwKZbUE)
 
 ## Features
 
@@ -22,10 +22,6 @@ A free, locally-hosted tool that helps game developers improve code through AI-a
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/Nachiketa-Singamsetty/game-code-iterator.git
-cd game-code-iterator
-
 # Clone the repository
 git clone https://github.com/Nachiketa-Singamsetty/game-code-iterator.git
 cd game-code-iterator
